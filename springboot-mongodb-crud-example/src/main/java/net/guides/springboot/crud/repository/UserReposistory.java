@@ -9,5 +9,7 @@ import net.guides.springboot.crud.model.User;
 	@Repository
 	public interface UserReposistory extends MongoRepository<User, Long>{
 
+		User findByusername(String username);
+
 	}
 
