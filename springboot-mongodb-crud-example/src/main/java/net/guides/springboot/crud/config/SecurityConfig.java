@@ -3,6 +3,7 @@ package net.guides.springboot.crud.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -19,6 +20,14 @@ import net.guides.springboot.crud.service.CustomeUserDetailsService;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	public static final String[] PUBLIC_URLS= {
+			"/authenticate",
+			"/v3/api-docs",
+			"/v2/api-docs",
+			"/swagger-resources/**",
+			"/swagger-ui/**",
+			"/webjars/**"
+	};
 
 
 	@Autowired
@@ -42,7 +51,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(HttpSecurity http )throws Exception{
-		http.csrf().disable().authorizeRequests().antMatchers("/authenticate").permitAll().anyRequest().authenticated()
+		http.cors().disable();
+		http.csrf().disable().authorizeRequests().antMatchers(PUBLIC_URLS)
+		.permitAll().antMatchers(HttpMethod.OPTIONS,"/**")
+		.permitAll().anyRequest().authenticated()
 		.and().exceptionHandling().and().sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

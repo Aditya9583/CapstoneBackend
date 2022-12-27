@@ -3,15 +3,12 @@ package net.guides.springboot.crud.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,10 +17,11 @@ import net.guides.springboot.crud.exception.ResourceNotFoundException;
 import net.guides.springboot.crud.model.AuthRequest;
 import net.guides.springboot.crud.model.AuthenticateModel;
 import net.guides.springboot.crud.model.User;
+import net.guides.springboot.crud.model.VendorNumbers;
 import net.guides.springboot.crud.repository.UserReposistory;
 
 
-@CrossOrigin(origins = "http://localhost:4200",maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 public class WelcomeController {
 	@Autowired
@@ -40,6 +38,14 @@ public class WelcomeController {
 	public String welcome() {
 		return "Welcome to India";
 	}
+	
+	@GetMapping("/vendors")
+	public ResponseEntity<List<User>> getEmployeeById( )
+		throws ResourceNotFoundException {
+	List<User> user = userReposistory.findByrole("Vendor");
+			
+	return ResponseEntity.ok().body(user);
+}
 	
 	@PostMapping("/authenticate")
 	public AuthenticateModel  generateToken(@RequestBody AuthRequest authRequest) throws Exception {
@@ -59,16 +65,11 @@ public class WelcomeController {
 		return model;
 		
 	}
-	@GetMapping("/vendors")
-	public ResponseEntity<List<User>> getEmployeeById( )
-		throws ResourceNotFoundException {
-	List<User> user = userReposistory.findByrole("Vendor");
-			
-	return ResponseEntity.ok().body(user);
-}
-	@PutMapping("/vendors/{username}")
-	public ResponseEntity<User> putVendorByUsername(@PathVariable(value = "username") String username){
-		User user= userReposistory.findByusername(username);
+	
+	
+	@PostMapping("/vendorsPermit")
+	public ResponseEntity<User> putVendorByUsername(@RequestBody VendorNumbers vendors){
+		User user= userReposistory.findByusername(vendors.getUsername());
 		user.setRole("Vendor_access");
 		userReposistory.save(user);
 		return ResponseEntity.ok().body(user);
