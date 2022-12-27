@@ -22,6 +22,7 @@ import net.guides.springboot.crud.service.CustomeUserDetailsService;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String[] PUBLIC_URLS= {
 			"/authenticate",
+			"/products",
 			"/v3/api-docs",
 			"/v2/api-docs",
 			"/swagger-resources/**",

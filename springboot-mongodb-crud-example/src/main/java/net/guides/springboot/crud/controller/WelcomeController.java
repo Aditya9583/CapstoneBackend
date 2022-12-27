@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import net.guides.springboot.crud.Util.JwtUtil;
 import net.guides.springboot.crud.exception.ResourceNotFoundException;
+import net.guides.springboot.crud.model.AddProduct;
 import net.guides.springboot.crud.model.AuthRequest;
 import net.guides.springboot.crud.model.AuthenticateModel;
 import net.guides.springboot.crud.model.User;
 import net.guides.springboot.crud.model.VendorNumbers;
+import net.guides.springboot.crud.repository.ProductReposistory;
 import net.guides.springboot.crud.repository.UserReposistory;
+import net.guides.springboot.crud.service.SequenceGeneratorService;
 
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -26,12 +29,16 @@ import net.guides.springboot.crud.repository.UserReposistory;
 public class WelcomeController {
 	@Autowired
 	private UserReposistory userReposistory;
+	@Autowired
+	private ProductReposistory productReposistory;
 
 	@Autowired
 	private JwtUtil jwtutil;
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	
+	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
 	@Autowired
 	private AuthenticateModel model;
 	@GetMapping("/")
@@ -73,6 +80,20 @@ public class WelcomeController {
 		user.setRole("Vendor_access");
 		userReposistory.save(user);
 		return ResponseEntity.ok().body(user);
+	}
+	
+	@PostMapping("/addProducts")
+	public ResponseEntity<AddProduct> addProducts(@RequestBody AddProduct products)
+	{
+		products.setId(sequenceGeneratorService.generateSequence(AddProduct.SEQUENCE_NAME));
+		productReposistory.save(products);
+		return ResponseEntity.ok().body(products);
+	}
+	
+	@GetMapping("/products")
+	public ResponseEntity<List<AddProduct>> getallProduct(){
+		List<AddProduct> products=productReposistory.findAll();
+		return ResponseEntity.ok().body(products);
 	}
 
 	
