@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -36,7 +38,8 @@ public class WelcomeController {
 	private JwtUtil jwtutil;
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	
+	@Autowired
+	private JavaMailSender emailSender;
 	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
 	@Autowired
@@ -53,6 +56,22 @@ public class WelcomeController {
 			
 	return ResponseEntity.ok().body(user);
 }
+	public void sendEmail(String toEmail,String subject,String body) {
+	SimpleMailMessage message=new SimpleMailMessage();
+	message.setFrom("onlinegroceryhm@gmail.com");
+	message.setTo(toEmail);
+	message.setText(body);
+	message.setSubject(subject);
+	emailSender.send(message);
+	
+}
+	@PostMapping("/users")
+	public User createEmployee( @RequestBody User user) {
+		System.out.println(user);
+		user.setId(sequenceGeneratorService.generateSequence(User.SEQUENCE_NAME));
+		sendEmail(user.getEmailId(),"Thank you for registration","Hi "+user.getUsername() +"Thank you for registration");
+		return userReposistory.save(user);
+	}
 	
 	@PostMapping("/authenticate")
 	public AuthenticateModel  generateToken(@RequestBody AuthRequest authRequest) throws Exception {
