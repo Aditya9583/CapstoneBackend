@@ -17,15 +17,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import net.guides.springboot.crud.Util.JwtUtil;
 import net.guides.springboot.crud.exception.ResourceNotFoundException;
+import net.guides.springboot.crud.model.AddCart;
 import net.guides.springboot.crud.model.AddCategory;
 import net.guides.springboot.crud.model.AddProduct;
 import net.guides.springboot.crud.model.AuthRequest;
 import net.guides.springboot.crud.model.AuthenticateModel;
 import net.guides.springboot.crud.model.ProductDetailsModel;
+import net.guides.springboot.crud.model.ReviewModel;
 import net.guides.springboot.crud.model.User;
 import net.guides.springboot.crud.model.VendorNumbers;
+import net.guides.springboot.crud.repository.CartReposistory;
 import net.guides.springboot.crud.repository.CategoryReposistory;
 import net.guides.springboot.crud.repository.ProductReposistory;
+import net.guides.springboot.crud.repository.ReviewReposistory;
 import net.guides.springboot.crud.repository.UserReposistory;
 import net.guides.springboot.crud.service.SequenceGeneratorService;
 
@@ -39,6 +43,10 @@ public class WelcomeController {
 	private ProductReposistory productReposistory;
 	@Autowired
 	private CategoryReposistory categoryReposistory;
+	@Autowired
+	private CartReposistory cartReposistory;
+	@Autowired
+	private ReviewReposistory reviewReposistory;
 	@Autowired
 	private JwtUtil jwtutil;
 	@Autowired
@@ -70,8 +78,10 @@ public class WelcomeController {
 	message.setText(body);
 	message.setSubject(subject);
 	emailSender.send(message);
-	
+		
 }
+	
+	
 	@PostMapping("/users")
 	public User createCustomer( @RequestBody User user) {
 		System.out.println(user);
@@ -88,6 +98,7 @@ public class WelcomeController {
 		User user= userReposistory.findByusername(authRequest.getUsername());
 		model.setUsername(authRequest.getUsername());
 		model.setRole(user.getRole());
+		model.setEmailId(user.getEmailId());
 		model.setToken(jwtutil.generateToken(authRequest.getUsername()));
 	}catch(Exception ex)
 		{
@@ -143,6 +154,35 @@ public class WelcomeController {
 		product.setPrice(category.getPrice());
 		productReposistory.save(product);
 		return ResponseEntity.ok().body(product);
+	}
+	@PostMapping("/addtocart")
+	public ResponseEntity<AddCart> addtocart(@RequestBody AddCart cart)
+	{
+		cart.setId(sequenceGeneratorService.generateSequence(AddCart.SEQUENCE_NAME));
+		cartReposistory.save(cart);
+		String productdetails="";
+		for(int i=0;i<cart.getProducts().size();i++)
+		{
+			productdetails=productdetails+(i+1)+" "+cart.getProducts().get(i)+"\n";
+		}
+		String message="Your order details are:\n"+productdetails+ "\n Thank you for shopping with us.Your order will be delivered soon."; 
+		sendEmail(cart.getEmail(), "Thank you for shopping with us", message);
+		return ResponseEntity.ok().body(cart);
+		
+	}
+	@PostMapping("/addReview")
+	public ResponseEntity<ReviewModel>addReviews(@RequestBody ReviewModel review)
+	{
+		review.setId(sequenceGeneratorService.generateSequence(ReviewModel.SEQUENCE_NAME));
+		reviewReposistory.save(review);
+		return ResponseEntity.ok().body(review);
+		
+	}
+	
+	@GetMapping("/getAllReview")
+	public ResponseEntity<List<ReviewModel>> getallReview(){
+		List<ReviewModel> reviews=reviewReposistory.findAll();
+		return ResponseEntity.ok().body(reviews);
 	}
 
 	

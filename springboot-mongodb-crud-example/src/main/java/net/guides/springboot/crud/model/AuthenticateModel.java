@@ -8,6 +8,13 @@ public class AuthenticateModel {
 	private String username;
 	private String role;
 	private String token;
+	private String emailId;
+	public String getEmailId() {
+		return emailId;
+	}
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
+	}
 	public String getUsername() {
 		return username;
 	}
@@ -26,9 +33,11 @@ public class AuthenticateModel {
 	public void setToken(String token) {
 		this.token = token;
 	}
-
 	@Override
 	public String toString() {
-		return "AuthenticateModel [username=" + username + ", role=" + role + ", token=" + token + "]";
+		return "AuthenticateModel [username=" + username + ", role=" + role + ", token=" + token + ", emailId="
+				+ emailId + "]";
 	}
+
+	
 }
